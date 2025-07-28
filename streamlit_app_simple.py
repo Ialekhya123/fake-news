@@ -1,20 +1,14 @@
-# This file is for Streamlit Cloud deployment
-# It's identical to app.py but with deployment-specific configurations
-
+# Simplified version for deployment - minimal NLTK dependency
 import streamlit as st
 import pandas as pd
 import numpy as np
 import pickle
 import re
-import nltk
-from nltk.corpus import stopwords
-from nltk.stem import WordNetLemmatizer
 import plotly.graph_objects as go
 import plotly.express as px
-from datetime import datetime
 import time
 
-# Page configuration for deployment
+# Page configuration
 st.set_page_config(
     page_title="Fake News Detector",
     page_icon="🔍",
@@ -22,7 +16,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for better styling
+# Custom CSS
 st.markdown("""
 <style>
     .main-header {
@@ -55,16 +49,6 @@ st.markdown("""
         background-color: #e8f5e8;
         color: #2e7d32;
         border: 2px solid #66bb6a;
-    }
-    .confidence-bar {
-        margin: 1rem 0;
-    }
-    .metric-card {
-        background-color: #f8f9fa;
-        padding: 1rem;
-        border-radius: 10px;
-        border-left: 4px solid #1f77b4;
-        margin: 0.5rem 0;
     }
     .info-box {
         background-color: #e3f2fd;
@@ -130,24 +114,30 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-class FakeNewsDetector:
+class SimpleFakeNewsDetector:
     def __init__(self):
         self.vectorizer = None
         self.model = None
-        self.lemmatizer = WordNetLemmatizer()
+        # Simple stop words list (no NLTK dependency)
+        self.stop_words = {
+            'i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', "you're", "you've", "you'll", "you'd",
+            'your', 'yours', 'yourself', 'yourselves', 'he', 'him', 'his', 'himself', 'she', "she's", 'her', 'hers',
+            'herself', 'it', "it's", 'its', 'itself', 'they', 'them', 'their', 'theirs', 'themselves', 'what', 'which',
+            'who', 'whom', 'this', 'that', "that'll", 'these', 'those', 'am', 'is', 'are', 'was', 'were', 'be', 'been',
+            'being', 'have', 'has', 'had', 'having', 'do', 'does', 'did', 'doing', 'a', 'an', 'the', 'and', 'but', 'if',
+            'or', 'because', 'as', 'until', 'while', 'of', 'at', 'by', 'for', 'with', 'against', 'between', 'into',
+            'through', 'during', 'before', 'after', 'above', 'below', 'to', 'from', 'up', 'down', 'in', 'out', 'on',
+            'off', 'over', 'under', 'again', 'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how',
+            'all', 'any', 'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only',
+            'own', 'same', 'so', 'than', 'too', 'very', 's', 't', 'can', 'will', 'just', 'don', "don't", 'should',
+            "should've", 'now', 'd', 'll', 'm', 'o', 're', 've', 'y', 'ain', 'aren', "aren't", 'couldn', "couldn't",
+            'didn', "didn't", 'doesn', "doesn't", 'hadn', "hadn't", 'hasn', "hasn't", 'haven', "haven't", 'isn', "isn't",
+            'ma', 'mightn', "mightn't", 'mustn', "mustn't", 'needn', "needn't", 'shan', "shan't", 'shouldn', "shouldn't",
+            'wasn', "wasn't", 'weren', "weren't", 'won', "won't", 'wouldn', "wouldn't"
+        }
         
-        # Download NLTK data if not available
-        try:
-            self.stop_words = set(stopwords.words('english'))
-        except LookupError:
-            import nltk
-            nltk.download('stopwords', quiet=True)
-            nltk.download('punkt', quiet=True)
-            nltk.download('wordnet', quiet=True)
-            self.stop_words = set(stopwords.words('english'))
-        
-    def preprocess_text(self, text):
-        """Enhanced text preprocessing"""
+    def simple_preprocess_text(self, text):
+        """Simple text preprocessing without NLTK"""
         if pd.isna(text):
             return ""
         
@@ -160,14 +150,11 @@ class FakeNewsDetector:
         # Remove special characters but keep important punctuation
         text = re.sub(r'[^a-zA-Z\s\.\,\!\?]', '', text)
         
-        # Tokenize
-        tokens = nltk.word_tokenize(text)
+        # Simple tokenization and stop word removal
+        words = text.split()
+        words = [word for word in words if word not in self.stop_words and len(word) > 2]
         
-        # Remove stopwords and lemmatize
-        tokens = [self.lemmatizer.lemmatize(token) for token in tokens 
-                 if token not in self.stop_words and len(token) > 2]
-        
-        return ' '.join(tokens)
+        return ' '.join(words)
     
     def extract_text_features(self, text):
         """Extract additional text-based features"""
@@ -210,7 +197,7 @@ class FakeNewsDetector:
             raise ValueError("Model not trained or loaded")
         
         # Preprocess the text
-        processed_text = self.preprocess_text(text)
+        processed_text = self.simple_preprocess_text(text)
         
         # Extract features
         features = self.vectorizer.transform([processed_text])
@@ -236,24 +223,7 @@ class FakeNewsDetector:
 def load_detector():
     """Load the fake news detector model"""
     try:
-        # Ensure NLTK data is available
-        import nltk
-        try:
-            nltk.data.find('corpora/stopwords')
-        except LookupError:
-            nltk.download('stopwords', quiet=True)
-        
-        try:
-            nltk.data.find('tokenizers/punkt')
-        except LookupError:
-            nltk.download('punkt', quiet=True)
-        
-        try:
-            nltk.data.find('corpora/wordnet')
-        except LookupError:
-            nltk.download('wordnet', quiet=True)
-        
-        detector = FakeNewsDetector()
+        detector = SimpleFakeNewsDetector()
         if detector.load_model():
             return detector
         else:
