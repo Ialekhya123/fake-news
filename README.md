@@ -25,8 +25,25 @@ A complete machine learning web application for detecting fake news using Python
    ```
 
 2. **Install required dependencies**
+   
+   **Option 1: Use the main requirements file**
    ```bash
    pip install -r requirements.txt
+   ```
+   
+   **Option 2: Use latest versions (recommended)**
+   ```bash
+   pip install -r requirements-latest.txt
+   ```
+   
+   **Option 3: Use minimal requirements (if you encounter issues)**
+   ```bash
+   pip install -r requirements-minimal.txt
+   ```
+   
+   **Option 4: Install packages individually**
+   ```bash
+   pip install streamlit scikit-learn pandas numpy nltk matplotlib seaborn plotly
    ```
 
 3. **Generate sample data**
@@ -160,12 +177,27 @@ The trained model typically achieves:
    - If issues persist, manually download: `python -m nltk.downloader punkt stopwords wordnet`
 
 3. **Dependencies not installed**
-   - Run `pip install -r requirements.txt`
+   - Try the different requirements files:
+     - `pip install -r requirements.txt` (specific versions)
+     - `pip install -r requirements-latest.txt` (latest versions)
+     - `pip install -r requirements-minimal.txt` (minimal requirements)
+   - Or install individually: `pip install streamlit scikit-learn pandas numpy nltk matplotlib seaborn plotly`
    - Ensure you're using Python 3.8+
 
 4. **Streamlit not working**
    - Check if Streamlit is installed: `pip install streamlit`
    - Try running: `streamlit run app.py --server.port 8501`
+
+5. **Package version conflicts**
+   - Create a virtual environment: `python -m venv venv`
+   - Activate it: `source venv/bin/activate` (Linux/Mac) or `venv\\Scripts\\activate` (Windows)
+   - Install packages in the clean environment
+   - If issues persist, try: `pip install --upgrade pip`
+
+6. **Build/Deployment issues**
+   - Use `requirements-minimal.txt` for deployment
+   - Ensure all packages are available in your deployment environment
+   - Check Python version compatibility (3.8+ recommended)
 
 ## 📈 Future Enhancements
 
