@@ -230,8 +230,21 @@ class FakeNewsDetector:
         }
 
 @st.cache_resource
+# Ensure NLTK data is available before loading the detector
 def load_detector():
-    """Load the fake news detector model"""
+    import nltk
+    try:
+        nltk.data.find('corpora/stopwords')
+    except LookupError:
+        nltk.download('stopwords', quiet=True)
+    try:
+        nltk.data.find('tokenizers/punkt')
+    except LookupError:
+        nltk.download('punkt', quiet=True)
+    try:
+        nltk.data.find('corpora/wordnet')
+    except LookupError:
+        nltk.download('wordnet', quiet=True)
     detector = FakeNewsDetector()
     if detector.load_model():
         return detector
